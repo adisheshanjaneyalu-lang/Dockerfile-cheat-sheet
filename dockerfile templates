@@ -1,0 +1,34 @@
+# ── Stage 1: BUILD (big image — compile your code) ──
+FROM language:version-alpine AS builder
+
+# Install system packages if needed (gcc etc.)
+RUN apk add --no-cache system-package
+
+WORKDIR /app
+
+# ALWAYS copy dependency file FIRST (Docker layer cache trick)
+COPY dependency-file .
+RUN install-command
+
+# Then copy rest of source code
+COPY . .
+
+# Build the binary / output
+RUN build-command
+
+# ── Stage 2: RUNTIME (tiny image — just run it) ──
+FROM minimal-base-image
+
+# Create non-root user (security)
+RUN adduser -D -s /bin/sh appuser
+
+WORKDIR /app
+
+# Copy ONLY the compiled output from Stage 1
+COPY --from=builder /app/binary .
+
+USER appuser
+
+EXPOSE PORT
+
+CMD ["./binary"]
