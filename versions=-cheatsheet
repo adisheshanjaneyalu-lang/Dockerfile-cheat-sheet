@@ -1,0 +1,132 @@
+🧠 How to find versions from project code
+🔹 1. Node.js / React (JavaScript projects)
+✅ Check package.json
+"engines": {
+  "node": ">=18"
+}
+
+👉 This directly tells Node version
+
+✅ Check .nvmrc
+18
+
+👉 Exact Node version
+
+✅ Check lock files
+package-lock.json
+yarn.lock
+
+👉 Not direct version, but confirms ecosystem
+
+✅ If nothing found (fallback)
+
+Look at dependencies:
+
+"react": "^18.2.0"
+
+👉 Safe choice:
+
+Node 18 or Node 20
+🚀 Docker image
+FROM node:18
+🔹 2. Python projects
+✅ Check requirements.txt
+flask==2.3.2
+
+👉 Doesn’t show Python version directly ❗
+
+✅ Check runtime.txt (VERY IMPORTANT)
+python-3.10.6
+✅ Check pyproject.toml
+[tool.poetry.dependencies]
+python = "^3.10"
+✅ Check .python-version
+3.11.2
+🚀 Docker image
+FROM python:3.10
+🔹 3. Java projects
+✅ Check pom.xml (Maven)
+<properties>
+  <java.version>17</java.version>
+</properties>
+✅ Check build.gradle
+sourceCompatibility = '17'
+🚀 Docker image
+FROM openjdk:17
+🔹 4. Go (Golang)
+✅ Check go.mod
+go 1.21
+🚀 Docker image
+FROM golang:1.21
+🔹 5. .NET
+✅ Check .csproj
+<TargetFramework>net7.0</TargetFramework>
+🚀 Docker image
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
+🔹 6. Ruby
+✅ Check Gemfile
+ruby '3.2.0'
+🚀 Docker image
+FROM ruby:3.2
+⚡ Universal DevOps Trick (Most Important)
+
+If version is NOT mentioned anywhere:
+
+👉 Safe approach:
+Node → node:18 or node:20
+Python → python:3.10
+Java → openjdk:17
+
+These are:
+✔ Stable
+✔ Widely supported
+✔ Production safe
+
+🔥 Pro-Level Trick (Real DevOps Engineers Use)
+
+Run locally:
+
+node -v
+python --version
+java -version
+
+👉 Then match same version in Dockerfile
+
+🧪 Folder Scan Strategy (SUPER IMPORTANT)
+
+When you open any repo:
+
+👉 Step 1:
+
+ls
+
+👉 Step 2: Look for:
+
+package.json → Node
+requirements.txt → Python
+pom.xml → Java
+go.mod → Go
+
+👉 Step 3:
+Open file → find version
+
+🚀 Real Production Insight
+
+Sometimes versions are defined in:
+
+.dockerignore
+.env
+CI/CD (like Jenkinsfile, GitHub Actions)
+🔥 Golden Rule
+
+👉 Always match project version with Docker version
+
+Mismatch = ❌ crashes, ❌ dependency issues
+
+If you want next step macha 😎
+
+👉 I can give you a real project repo
+👉 You identify stack + version
+👉 I’ll review like interviewer
+
+Just say: “give me practice repo” 🔥
