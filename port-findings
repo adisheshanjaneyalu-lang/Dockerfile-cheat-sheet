@@ -1,0 +1,169 @@
+EXPOSE — How to Find the Port
+Method 1 — Look at the Code Directly
+In your ShopVerse main.go:
+goport := os.Getenv("PORT")
+if port == "" {
+    port = "8080"        // ← DEFAULT PORT IS RIGHT HERE!
+}
+log.Fatal(app.Listen(":" + port))
+//                    ^^^^
+//                    app listens on this port
+You see 8080 as default → EXPOSE 8080
+
+Method 2 — README
+markdown## Run locally
+go run ./cmd/main.go
+# Backend: http://localhost:8080   ← PORT IS HERE
+
+Method 3 — Existing config files
+yaml# docker-compose.yml
+ports:
+  - "8080:8080"    # ← port is here
+
+# kubernetes service yaml
+port: 8080         # ← port is here
+targetPort: 8080
+
+Common Default Ports — Know These
+Go/Fiber         →  8080
+Node/Express     →  3000
+Python/FastAPI   →  8000
+React dev        →  3000 (Vite) / 5173 (new Vite)
+Nginx            →  80
+MySQL            →  3306
+PostgreSQL       →  5432
+Redis            →  6379
+MongoDB          →  27017
+Jenkins          →  8080
+SonarQube        →  9000
+Grafana          →  3000
+Prometheus       →  9090
+You'll memorize these naturally over time.
+
+ENV Variables — How to Find Them
+Method 1 — Search for os.Getenv in Code
+This is the most reliable method. Every language has a way to read env vars:
+bash# Search entire codebase at once
+grep -r "os.Getenv" .          # Go
+grep -r "process.env" .        # Node.js
+grep -r "os.environ" .         # Python
+grep -r "System.getenv" .      # Java
+In your ShopVerse backend:
+bashgrep -r "os.Getenv" ./backend
+Output:
+database.go: dbUser     := getEnv("DB_USER", "shopverse")
+database.go: dbPassword := getEnv("DB_PASSWORD", "shopverse123")
+database.go: dbHost     := getEnv("DB_HOST", "localhost")
+database.go: dbPort     := getEnv("DB_PORT", "3306")
+database.go: dbName     := getEnv("DB_NAME", "shopverse")
+main.go:     port       := os.Getenv("PORT")
+main.go:     frontendOrigin := os.Getenv("FRONTEND_ORIGIN")
+Every env var your app needs is RIGHT THERE. All in one search.
+
+Method 2 — Look at .env.example file
+Good developers always leave an example env file:
+bash# .env.example
+PORT=8080
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=shopverse
+DB_PASSWORD=shopverse123
+DB_NAME=shopverse
+JWT_SECRET=your-secret-key
+FRONTEND_ORIGIN=http://localhost:3000
+This is literally a list of all env vars the app needs. Copy them straight into your Dockerfile or docker-compose.
+
+Method 3 — README
+markdown## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| PORT | 8080 | Server port |
+| DB_HOST | localhost | Database host |
+| DB_PASSWORD | - | Database password |
+| JWT_SECRET | - | JWT signing key |
+
+Method 4 — docker-compose.yml Already in Repo
+yamlbackend:
+  environment:
+    PORT: 8080
+    DB_HOST: db
+    DB_USER: shopverse        # ← all env vars listed here
+    DB_PASSWORD: shopverse123
+    JWT_SECRET: secret-key
+
+Now Apply to Your ShopVerse Dockerfile
+Step 1 — grep for env vars
+bashgrep -r "os.Getenv\|getEnv" ./backend
+Step 2 — You find ALL of these
+PORT            default: 8080
+FRONTEND_ORIGIN default: http://localhost:3000
+DB_USER         default: shopverse
+DB_PASSWORD     default: shopverse123
+DB_HOST         default: localhost
+DB_PORT         default: 3306
+DB_NAME         default: shopverse
+Step 3 — Write your Dockerfile
+dockerfileFROM golang:1.24-alpine AS builder
+RUN apk add --no-cache git
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-w -s" \
+    -o shopverse-backend \
+    ./cmd/main.go
+
+FROM alpine:3.19
+RUN apk add --no-cache ca-certificates tzdata
+RUN adduser -D -s /bin/sh appuser
+WORKDIR /app
+COPY --from=builder /app/shopverse-backend .
+USER appuser
+
+# ── Port found from main.go ──────────────
+EXPOSE 8080
+
+# ── Env vars found from grep ─────────────
+# Safe defaults only — secrets passed at runtime!
+ENV PORT=8080
+ENV FRONTEND_ORIGIN=http://localhost:3000
+ENV DB_HOST=localhost
+ENV DB_PORT=3306
+ENV DB_NAME=shopverse
+
+# DB_PASSWORD and JWT_SECRET → NOT hardcoded here!
+# Pass them at runtime:
+# docker run -e DB_PASSWORD=xxx -e JWT_SECRET=yyy
+
+CMD ["./shopverse-backend"]
+
+Important Rule — What to Hardcode vs What NOT to
+SAFE to hardcode in Dockerfile     NOT safe — pass at runtime
+──────────────────────────────     ──────────────────────────
+PORT=8080                          DB_PASSWORD=xxx
+DB_HOST=localhost                  JWT_SECRET=xxx
+DB_PORT=3306                       API_KEY=xxx
+DB_NAME=shopverse                  AWS_SECRET=xxx
+FRONTEND_ORIGIN=http://...
+
+These are non-sensitive defaults     These are secrets!
+Anyone can see them anyway           docker inspect reveals them
+                                     use K8s secrets or .env file
+
+Summary — Your Process Every Time
+Finding PORT:
+└── grep "Listen\|PORT\|port" in main file
+└── check README
+└── check docker-compose.yml
+└── know common defaults (8080, 3000, 8000)
+
+Finding ENV vars:
+└── grep "os.Getenv" (Go)
+└── grep "process.env" (Node)
+└── grep "os.environ" (Python)
+└── check .env.example file
+└── check README env table
+└── check docker-compose.yml environment section
+The code always tells you everything. You just need to know where to look — and grep finds it in seconds.
