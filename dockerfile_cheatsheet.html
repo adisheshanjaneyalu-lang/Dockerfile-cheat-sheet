@@ -1,0 +1,605 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-mono); }
+.cs { padding: 1rem 0; max-width: 900px; }
+.hero { background: #1a1a2e; border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+.hero-title { font-size: 22px; font-weight: 500; color: #e2e8f0; font-family: var(--font-sans); letter-spacing: -0.5px; }
+.hero-sub { font-size: 13px; color: #94a3b8; margin-top: 6px; font-family: var(--font-sans); }
+.hero-badges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-family: var(--font-sans); font-weight: 500; }
+.badge-blue { background: #1e3a5f; color: #7dd3fc; }
+.badge-green { background: #14532d; color: #86efac; }
+.badge-amber { background: #451a03; color: #fcd34d; }
+.section { margin-bottom: 1.25rem; }
+.section-title { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-family: var(--font-sans); padding-left: 2px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; }
+.card-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 8px; font-family: var(--font-sans); }
+.code-block { background: #0f172a; border-radius: var(--border-radius-md); padding: 1rem; overflow-x: auto; }
+.code-block code { font-size: 12px; line-height: 1.8; white-space: pre; display: block; font-family: var(--font-mono); }
+.kw { color: #f472b6; }
+.val { color: #86efac; }
+.cmt { color: #475569; }
+.str { color: #fbbf24; }
+.cmd { color: #7dd3fc; }
+.step-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; font-family: var(--font-sans); background: #1e3a5f; color: #7dd3fc; }
+.step-content { flex: 1; }
+.step-label { font-size: 13px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-sans); }
+.step-desc { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; font-family: var(--font-sans); }
+.file-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-right: 4px; font-family: var(--font-mono); font-weight: 500; }
+.ft-go { background: #0c4a6e; color: #7dd3fc; }
+.ft-node { background: #14532d; color: #86efac; }
+.ft-py { background: #1e1b4b; color: #a5b4fc; }
+.ft-java { background: #431407; color: #fdba74; }
+.ft-rb { background: #4a1942; color: #f0abfc; }
+.ft-rs { background: #3b1f00; color: #fcd34d; }
+.lang-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.lang-row:last-child { border-bottom: none; }
+.lang-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-sans); width: 80px; flex-shrink: 0; }
+.lang-detail { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); }
+.tip-card { border-left: 2px solid; padding: 10px 12px; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; margin-bottom: 8px; }
+.tip-good { background: #052e16; border-color: #16a34a; }
+.tip-bad { background: #1c0505; border-color: #dc2626; }
+.tip-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-family: var(--font-sans); }
+.tip-good .tip-label { color: #4ade80; }
+.tip-bad .tip-label { color: #f87171; }
+.tip-code { font-size: 12px; font-family: var(--font-mono); color: #e2e8f0; line-height: 1.6; }
+.instruction-table { width: 100%; border-collapse: collapse; }
+.instruction-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-secondary); font-weight: 500; text-align: left; padding: 6px 10px; font-family: var(--font-sans); border-bottom: 0.5px solid var(--color-border-tertiary); }
+.instruction-table td { font-size: 12px; padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: top; font-family: var(--font-sans); color: var(--color-text-primary); }
+.instruction-table tr:last-child td { border-bottom: none; }
+.instruction-table td:first-child { font-family: var(--font-mono); color: #f472b6; font-size: 12px; white-space: nowrap; }
+.instruction-table td:nth-child(2) { color: var(--color-text-secondary); font-size: 12px; }
+.flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.flow-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 6px 12px; font-size: 12px; font-family: var(--font-sans); color: var(--color-text-primary); text-align: center; }
+.flow-arrow { color: var(--color-text-secondary); font-size: 14px; }
+.flow-box.highlight { background: #1e3a5f; border-color: #3b82f6; color: #7dd3fc; }
+.size-bar { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+.size-label { font-size: 12px; font-family: var(--font-sans); color: var(--color-text-secondary); width: 130px; flex-shrink: 0; }
+.size-track { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+.size-fill { height: 100%; border-radius: 4px; }
+.size-num { font-size: 12px; font-family: var(--font-mono); color: var(--color-text-primary); width: 55px; text-align: right; }
+.checklist-item { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.checklist-item:last-child { border-bottom: none; }
+.check-icon { width: 16px; height: 16px; border-radius: 50%; background: #14532d; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 9px; color: #86efac; }
+.check-text { font-size: 13px; font-family: var(--font-sans); color: var(--color-text-primary); }
+.check-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; font-family: var(--font-sans); }
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.25rem 0; }
+</style>
+
+<div class="cs">
+
+<div class="hero">
+  <div class="hero-title">Dockerfile Cheat Sheet</div>
+  <div class="hero-sub">Everything you need to write production-grade Dockerfiles — from zero to hero</div>
+  <div class="hero-badges">
+    <span class="badge badge-blue">Multi-stage builds</span>
+    <span class="badge badge-green">All languages</span>
+    <span class="badge badge-amber">Production tips</span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Step 1 — Look at the repo files to find the language</div>
+  <div class="card">
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-go">go.mod</span></span>
+      <span class="lang-detail">→ Go lang &nbsp;|&nbsp; base: golang:VERSION-alpine &nbsp;|&nbsp; install: go mod download</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-node">package.json</span></span>
+      <span class="lang-detail">→ Node/React &nbsp;|&nbsp; base: node:VERSION-alpine &nbsp;|&nbsp; install: npm install</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-py">requirements.txt</span></span>
+      <span class="lang-detail">→ Python &nbsp;|&nbsp; base: python:VERSION-alpine &nbsp;|&nbsp; install: pip install -r requirements.txt</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-java">pom.xml</span></span>
+      <span class="lang-detail">→ Java Maven &nbsp;|&nbsp; base: maven:VERSION-alpine &nbsp;|&nbsp; install: mvn dependency:go-offline</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-rb">Gemfile</span></span>
+      <span class="lang-detail">→ Ruby &nbsp;|&nbsp; base: ruby:VERSION-alpine &nbsp;|&nbsp; install: bundle install</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name"><span class="file-tag ft-rs">Cargo.toml</span></span>
+      <span class="lang-detail">→ Rust &nbsp;|&nbsp; base: rust:VERSION-alpine &nbsp;|&nbsp; install: cargo build</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Step 2 — FROM tells you the package manager</div>
+  <div class="card">
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">...alpine</span>
+      <span class="lang-detail">→ use <span style="color:#fbbf24;">apk add --no-cache</span> &nbsp; (Alpine Linux — tiny, 5MB)</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">ubuntu / debian</span>
+      <span class="lang-detail">→ use <span style="color:#fbbf24;">apt-get install -y</span> &nbsp; (Ubuntu/Debian)</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">amazonlinux</span>
+      <span class="lang-detail">→ use <span style="color:#fbbf24;">yum install -y</span> &nbsp; (Amazon Linux / CentOS)</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Step 3 — The 5 questions to answer before writing</div>
+  <div class="card">
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-label">What language?</div>
+        <div class="step-desc">Look at files: go.mod / package.json / requirements.txt</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-label">What version?</div>
+        <div class="step-desc">Open that file — "go 1.24" or "node: 18" or "python-3.11"</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-label">How to install dependencies?</div>
+        <div class="step-desc">go mod download / npm install / pip install -r requirements.txt</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-label">How to build?</div>
+        <div class="step-desc">Check README — go build / npm run build / mvn package</div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-label">How to run?</div>
+        <div class="step-desc">Check README — ./app / node server.js / uvicorn main:app</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">All Dockerfile instructions explained</div>
+  <div class="card" style="padding: 0.5rem 0;">
+    <table class="instruction-table">
+      <tr><th>Instruction</th><th>What it does</th><th>Example</th></tr>
+      <tr>
+        <td>FROM</td>
+        <td>Pick the base image (starting point)</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">FROM golang:1.24-alpine</td>
+      </tr>
+      <tr>
+        <td>WORKDIR</td>
+        <td>Set working folder inside container</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">WORKDIR /app</td>
+      </tr>
+      <tr>
+        <td>COPY</td>
+        <td>Copy files from your machine into container</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">COPY go.mod go.sum ./</td>
+      </tr>
+      <tr>
+        <td>RUN</td>
+        <td>Run a command during BUILD time</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">RUN go mod download</td>
+      </tr>
+      <tr>
+        <td>ENV</td>
+        <td>Set environment variable</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">ENV PORT=8080</td>
+      </tr>
+      <tr>
+        <td>EXPOSE</td>
+        <td>Document which port the app uses</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">EXPOSE 8080</td>
+      </tr>
+      <tr>
+        <td>ARG</td>
+        <td>Variable only available during build</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">ARG APP_VERSION=1.0</td>
+      </tr>
+      <tr>
+        <td>USER</td>
+        <td>Switch to non-root user (security)</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">USER appuser</td>
+      </tr>
+      <tr>
+        <td>HEALTHCHECK</td>
+        <td>Tell Docker how to check if app is alive</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">HEALTHCHECK CMD curl /health</td>
+      </tr>
+      <tr>
+        <td>CMD</td>
+        <td>Default command when container STARTS (can override)</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">CMD ["./app"]</td>
+      </tr>
+      <tr>
+        <td>ENTRYPOINT</td>
+        <td>Fixed command — cannot be overridden</td>
+        <td style="font-family:var(--font-mono);font-size:11px;color:#86efac;">ENTRYPOINT ["./app"]</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Universal template — works for every language</div>
+  <div class="code-block">
+    <code><span class="cmt"># ── Stage 1: BUILD (big image — compile your code) ──</span>
+<span class="kw">FROM</span> <span class="str">language:version-alpine</span> <span class="kw">AS</span> <span class="val">builder</span>
+
+<span class="cmt"># Install system packages if needed (gcc etc.)</span>
+<span class="kw">RUN</span> <span class="cmd">apk add --no-cache</span> <span class="str">system-package</span>
+
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+
+<span class="cmt"># ALWAYS copy dependency file FIRST (Docker layer cache trick)</span>
+<span class="kw">COPY</span> <span class="str">dependency-file</span> <span class="str">.</span>
+<span class="kw">RUN</span> <span class="cmd">install-command</span>
+
+<span class="cmt"># Then copy rest of source code</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+
+<span class="cmt"># Build the binary / output</span>
+<span class="kw">RUN</span> <span class="cmd">build-command</span>
+
+<span class="cmt"># ── Stage 2: RUNTIME (tiny image — just run it) ──</span>
+<span class="kw">FROM</span> <span class="str">minimal-base-image</span>
+
+<span class="cmt"># Create non-root user (security)</span>
+<span class="kw">RUN</span> <span class="cmd">adduser -D -s /bin/sh appuser</span>
+
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+
+<span class="cmt"># Copy ONLY the compiled output from Stage 1</span>
+<span class="kw">COPY</span> <span class="kw">--from=</span><span class="val">builder</span> <span class="str">/app/binary</span> <span class="str">.</span>
+
+<span class="kw">USER</span> <span class="str">appuser</span>
+
+<span class="kw">EXPOSE</span> <span class="str">PORT</span>
+
+<span class="kw">CMD</span> <span class="str">["./binary"]</span></code>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Real examples — fill in the blanks</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Go backend</div>
+      <div class="code-block">
+        <code><span class="kw">FROM</span> <span class="str">golang:1.24-alpine</span> <span class="kw">AS</span> <span class="val">builder</span>
+<span class="kw">RUN</span> <span class="cmd">apk add --no-cache git</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="str">go.mod go.sum ./</span>
+<span class="kw">RUN</span> <span class="cmd">go mod download</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+<span class="kw">RUN</span> <span class="cmd">CGO_ENABLED=0 go build \
+  -ldflags="-w -s" \
+  -o app ./cmd/main.go</span>
+
+<span class="kw">FROM</span> <span class="str">alpine:3.19</span>
+<span class="kw">RUN</span> <span class="cmd">apk add --no-cache \
+  ca-certificates tzdata</span>
+<span class="kw">RUN</span> <span class="cmd">adduser -D appuser</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="kw">--from=</span><span class="val">builder</span> <span class="str">/app/app .</span>
+<span class="kw">USER</span> <span class="str">appuser</span>
+<span class="kw">EXPOSE</span> <span class="str">8080</span>
+<span class="kw">CMD</span> <span class="str">["./app"]</span></code>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">React / Vite frontend</div>
+      <div class="code-block">
+        <code><span class="kw">FROM</span> <span class="str">node:18-alpine</span> <span class="kw">AS</span> <span class="val">builder</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+<span class="kw">RUN</span> <span class="cmd">npm install</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+<span class="cmt"># Vite → dist/  |  CRA → build/</span>
+<span class="kw">RUN</span> <span class="cmd">npm run build</span>
+
+<span class="kw">FROM</span> <span class="str">nginx:alpine</span>
+<span class="kw">RUN</span> <span class="cmd">rm -rf \
+  /usr/share/nginx/html/*</span>
+<span class="cmt"># Vite output is dist/</span>
+<span class="kw">COPY</span> <span class="kw">--from=</span><span class="val">builder</span> \
+  <span class="str">/app/dist \
+  /usr/share/nginx/html</span>
+<span class="kw">COPY</span> <span class="str">nginx.conf \
+  /etc/nginx/conf.d/default.conf</span>
+<span class="kw">EXPOSE</span> <span class="str">80</span>
+<span class="kw">CMD</span> <span class="str">["nginx","-g","daemon off;"]</span></code>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Python FastAPI</div>
+      <div class="code-block">
+        <code><span class="kw">FROM</span> <span class="str">python:3.11-alpine</span> <span class="kw">AS</span> <span class="val">builder</span>
+<span class="cmt"># psycopg2 needs gcc to compile</span>
+<span class="kw">RUN</span> <span class="cmd">apk add --no-cache \
+  gcc musl-dev libpq-dev</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="str">requirements.txt .</span>
+<span class="kw">RUN</span> <span class="cmd">pip install --no-cache-dir \
+  -r requirements.txt</span>
+
+<span class="kw">FROM</span> <span class="str">python:3.11-alpine</span>
+<span class="cmt"># Python needs interpreter!</span>
+<span class="kw">RUN</span> <span class="cmd">apk add --no-cache libpq</span>
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+<span class="kw">COPY</span> <span class="kw">--from=</span><span class="val">builder</span> \
+  <span class="str">/usr/local/lib/python3.11 \
+  /usr/local/lib/python3.11</span>
+<span class="kw">COPY</span> <span class="str">. .</span>
+<span class="kw">EXPOSE</span> <span class="str">8000</span>
+<span class="kw">CMD</span> <span class="str">["uvicorn","main:app",
+  "--host","0.0.0.0",
+  "--port","8000"]</span></code>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Node.js Express API</div>
+      <div class="code-block">
+        <code><span class="cmt"># No build step needed!</span>
+<span class="cmt"># Node runs source directly</span>
+<span class="kw">FROM</span> <span class="str">node:18-alpine</span>
+
+<span class="kw">WORKDIR</span> <span class="str">/app</span>
+
+<span class="kw">COPY</span> <span class="str">package*.json ./</span>
+<span class="cmt"># --only=production skips</span>
+<span class="cmt"># devDependencies (smaller!)</span>
+<span class="kw">RUN</span> <span class="cmd">npm install \
+  --only=production</span>
+
+<span class="kw">COPY</span> <span class="str">. .</span>
+
+<span class="kw">RUN</span> <span class="cmd">adduser -D appuser</span>
+<span class="kw">USER</span> <span class="str">appuser</span>
+
+<span class="kw">EXPOSE</span> <span class="str">3000</span>
+
+<span class="cmt"># from scripts.start in package.json</span>
+<span class="kw">CMD</span> <span class="str">["node", "server.js"]</span></code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Runtime image — which one to pick</div>
+  <div class="card">
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">alpine:3.19</span>
+      <span class="lang-detail">5MB — has shell + basic OS. Use for Go, Python, Node binaries. Most common.</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">scratch</span>
+      <span class="lang-detail">0MB — completely empty. Use for Go binaries with CGO_ENABLED=0. Ultra minimal.</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">distroless</span>
+      <span class="lang-detail">2MB — no shell, no tools. Most secure. Use in high-security production (your Shivam project!).</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">nginx:alpine</span>
+      <span class="lang-detail">23MB — Alpine + Nginx. Always use for React/Vue frontend static files.</span>
+    </div>
+    <div class="lang-row">
+      <span class="lang-name" style="font-family:var(--font-mono);font-size:12px;color:#f472b6;">temurin:JRE</span>
+      <span class="lang-detail">Use for Java .jar files. JRE = run only. JDK = compile + run (too big for runtime).</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Image size — why multi-stage matters</div>
+  <div class="card">
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">golang:1.24-alpine</span>
+      <div class="size-track"><div class="size-fill" style="width:100%;background:#dc2626;"></div></div>
+      <span class="size-num">~300MB</span>
+    </div>
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">node:18-alpine</span>
+      <div class="size-track"><div class="size-fill" style="width:55%;background:#ea580c;"></div></div>
+      <span class="size-num">~165MB</span>
+    </div>
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">nginx:alpine</span>
+      <div class="size-track"><div class="size-fill" style="width:8%;background:#ca8a04;"></div></div>
+      <span class="size-num">~23MB</span>
+    </div>
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">Go multi-stage</span>
+      <div class="size-track"><div class="size-fill" style="width:4%;background:#16a34a;"></div></div>
+      <span class="size-num">~12MB</span>
+    </div>
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">alpine:3.19</span>
+      <div class="size-track"><div class="size-fill" style="width:1.5%;background:#0891b2;"></div></div>
+      <span class="size-num">~5MB</span>
+    </div>
+    <div class="size-bar">
+      <span class="size-label" style="font-family:var(--font-sans);font-size:12px;color:var(--color-text-secondary);">scratch</span>
+      <div class="size-track"><div class="size-fill" style="width:0.5%;background:#7c3aed;"></div></div>
+      <span class="size-num">0MB</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Production tips — do this, not that</div>
+  <div class="grid2">
+    <div>
+      <div class="tip-card tip-bad">
+        <div class="tip-label">never do this</div>
+        <div class="tip-code">COPY . .
+RUN npm install
+<span style="color:#f87171;"># copies everything FIRST
+# then installs
+# cache breaks every change!</span></div>
+      </div>
+      <div class="tip-card tip-good">
+        <div class="tip-label">always do this</div>
+        <div class="tip-code">COPY package*.json ./
+RUN npm install
+COPY . .
+<span style="color:#4ade80;"># dep file first → install
+# THEN copy source
+# cache only breaks when
+# package.json changes</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="tip-card tip-bad">
+        <div class="tip-label">never do this</div>
+        <div class="tip-code">RUN apt-get update
+RUN apt-get install git
+RUN apt-get install curl
+<span style="color:#f87171;"># 3 separate layers = bloat
+# each RUN = new layer</span></div>
+      </div>
+      <div class="tip-card tip-good">
+        <div class="tip-label">always do this</div>
+        <div class="tip-code">RUN apk add --no-cache \
+  git curl wget
+<span style="color:#4ade80;"># one RUN = one layer
+# --no-cache = no index stored
+# smaller image</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="tip-card tip-bad">
+        <div class="tip-label">never do this</div>
+        <div class="tip-code">ENV DB_PASSWORD=mypassword
+ENV JWT_SECRET=abc123
+<span style="color:#f87171;"># hardcoded secrets in image!
+# anyone can read with
+# docker inspect</span></div>
+      </div>
+      <div class="tip-card tip-good">
+        <div class="tip-label">always do this</div>
+        <div class="tip-code">ENV DB_PASSWORD=""
+<span style="color:#4ade80;"># empty default
+# pass real value at runtime:</span>
+docker run -e DB_PASSWORD=xxx
+<span style="color:#4ade80;"># or via K8s secret / .env</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="tip-card tip-bad">
+        <div class="tip-label">never do this</div>
+        <div class="tip-code">FROM node:18-alpine
+<span style="color:#f87171;"># running as root by default
+# if hacker gets in = game over
+# full container control</span></div>
+      </div>
+      <div class="tip-card tip-good">
+        <div class="tip-label">always do this</div>
+        <div class="tip-code">RUN adduser -D appuser
+USER appuser
+<span style="color:#4ade80;"># non-root user
+# limited permissions
+# hacker can't do much</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Always create .dockerignore (next to Dockerfile)</div>
+  <div class="code-block">
+    <code><span class="cmt"># .dockerignore — stops these from being copied into image</span>
+<span class="val">node_modules/</span>      <span class="cmt"># huge folder — npm install handles this inside</span>
+<span class="val">.git/</span>              <span class="cmt"># git history not needed in container</span>
+<span class="val">.env</span>               <span class="cmt"># secrets must never go into image!</span>
+<span class="val">dist/</span>              <span class="cmt"># build output — will be rebuilt inside</span>
+<span class="val">*.log</span>              <span class="cmt"># log files</span>
+<span class="val">README.md</span>          <span class="cmt"># docs not needed</span>
+<span class="val">Dockerfile</span>         <span class="cmt"># dockerfile itself not needed inside</span>
+<span class="val">.dockerignore</span>      <span class="cmt"># this file itself</span></code>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Production checklist — before pushing to ECR/DockerHub</div>
+  <div class="card">
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">Multi-stage build used</div><div class="check-sub">Build image for compiling, tiny image for running</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">Dependency file copied before source code</div><div class="check-sub">go.mod / package.json / requirements.txt first → then COPY . .</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">Non-root user created</div><div class="check-sub">adduser -D appuser → USER appuser before CMD</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">No secrets hardcoded</div><div class="check-sub">Passwords, tokens, API keys passed at runtime via env vars</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">.dockerignore file exists</div><div class="check-sub">node_modules, .env, .git excluded</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">--no-cache on apk add</div><div class="check-sub">Keeps image smaller, no package index stored</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">EXPOSE port documented</div><div class="check-sub">Tells Kubernetes and Docker what port the app uses</div></div>
+    </div>
+    <div class="checklist-item">
+      <div class="check-icon">✓</div>
+      <div><div class="check-text">CMD uses exec form not shell form</div><div class="check-sub">CMD ["./app"] not CMD ./app — handles signals properly in K8s</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quick commands</div>
+  <div class="code-block">
+    <code><span class="cmt"># Build image</span>
+<span class="cmd">docker build -t</span> <span class="str">myapp:v1</span> <span class="str">.</span>
+
+<span class="cmt"># Run container</span>
+<span class="cmd">docker run -p</span> <span class="str">8080:8080</span> <span class="cmd">-e</span> <span class="str">PORT=8080</span> <span class="str">myapp:v1</span>
+
+<span class="cmt"># Check image size</span>
+<span class="cmd">docker images</span> <span class="str">myapp</span>
+
+<span class="cmt"># See layers and what's taking space</span>
+<span class="cmd">docker history</span> <span class="str">myapp:v1</span>
+
+<span class="cmt"># Open shell inside running container (debug)</span>
+<span class="cmd">docker exec -it</span> <span class="str">container-name</span> <span class="str">sh</span>
+
+<span class="cmt"># See logs</span>
+<span class="cmd">docker logs -f</span> <span class="str">container-name</span>
+
+<span class="cmt"># Tag for ECR and push</span>
+<span class="cmd">docker tag</span> <span class="str">myapp:v1 account.dkr.ecr.region.amazonaws.com/myapp:v1</span>
+<span class="cmd">docker push</span> <span class="str">account.dkr.ecr.region.amazonaws.com/myapp:v1</span></code>
+  </div>
+</div>
+
+</div>
