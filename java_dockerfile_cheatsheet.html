@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d1117;color:#e6edf3;font-family:'Syne',sans-serif;padding:24px 16px;min-height:100vh}
+  h1{font-size:22px;font-weight:800;color:#f0f6fc;letter-spacing:-0.5px;margin-bottom:4px}
+  .subtitle{font-size:13px;color:#7d8590;margin-bottom:24px;font-family:'JetBrains Mono',monospace}
+
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+  .tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #30363d;background:#161b22;color:#7d8590;transition:all .2s;font-family:'Syne',sans-serif}
+  .tab:hover{border-color:#58a6ff;color:#58a6ff}
+  .tab.active{background:#1f3a5f;border-color:#58a6ff;color:#58a6ff}
+
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .section-title{font-size:13px;font-weight:700;color:#7d8590;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:#21262d}
+
+  .card{background:#161b22;border:1px solid #21262d;border-radius:10px;margin-bottom:16px;overflow:hidden}
+  .card-header{padding:10px 14px;border-bottom:1px solid #21262d;display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:13px;font-weight:700;color:#e6edf3}
+  .badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;font-family:'JetBrains Mono',monospace}
+  .badge-blue{background:#1f3a5f;color:#58a6ff}
+  .badge-green{background:#1a3a2a;color:#3fb950}
+  .badge-orange{background:#3a2a10;color:#d29922}
+  .badge-red{background:#3a1a1a;color:#f85149}
+  .badge-purple{background:#2a1a3a;color:#bc8cff}
+
+  pre{margin:0;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;overflow-x:auto;background:#0d1117}
+  .comment{color:#8b949e}
+  .keyword{color:#ff7b72}
+  .string{color:#a5d6ff}
+  .value{color:#79c0ff}
+  .highlight{color:#3fb950}
+  .warn{color:#d29922}
+
+  .tip-box{background:#1a2332;border:1px solid #1f3a5f;border-left:3px solid #58a6ff;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#8b9fba;line-height:1.7}
+  .tip-box strong{color:#58a6ff;font-weight:600}
+
+  .warn-box{background:#2a1f0f;border:1px solid #3a2a10;border-left:3px solid #d29922;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#c9a84c;line-height:1.7}
+  .warn-box strong{color:#d29922}
+
+  .good-box{background:#0f2a1a;border:1px solid #1a3a2a;border-left:3px solid #3fb950;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#7ec99a;line-height:1.7}
+  .good-box strong{color:#3fb950}
+
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .compare-card{background:#161b22;border:1px solid #21262d;border-radius:10px;overflow:hidden}
+  .compare-header{padding:8px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .bad-header{background:#3a1a1a;color:#f85149;border-bottom:1px solid #5a2a2a}
+  .good-header{background:#0f2a1a;color:#3fb950;border-bottom:1px solid #1a4a2a}
+
+  .size-bar-wrap{margin-bottom:8px}
+  .size-label{font-size:11px;color:#7d8590;margin-bottom:4px;font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between}
+  .size-bar{height:18px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;transition:width .5s}
+  .bar-red{background:#5a1a1a;color:#f85149}
+  .bar-orange{background:#3a2a10;color:#d29922}
+  .bar-green{background:#0f3a1a;color:#3fb950}
+
+  .cmd-table{width:100%;border-collapse:collapse}
+  .cmd-table td{padding:8px 12px;font-size:12px;border-bottom:1px solid #21262d;vertical-align:top}
+  .cmd-table tr:last-child td{border-bottom:none}
+  .cmd-table .cmd{font-family:'JetBrains Mono',monospace;color:#79c0ff;white-space:nowrap}
+  .cmd-table .desc{color:#8b949e;line-height:1.5}
+
+  @media(max-width:500px){.compare-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>☕ Java Dockerfile Cheatsheet</h1>
+<div class="subtitle"># everything you need to dockerize a Java app</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('basic')">Basic</div>
+  <div class="tab" onclick="show('multistage')">Multi-stage</div>
+  <div class="tab" onclick="show('spring')">Spring Boot</div>
+  <div class="tab" onclick="show('optimise')">Optimise</div>
+  <div class="tab" onclick="show('sizes')">Image Sizes</div>
+  <div class="tab" onclick="show('commands')">CMD vs ENTRYPOINT</div>
+</div>
+
+<!-- BASIC -->
+<div class="panel active" id="panel-basic">
+  <div class="section-title">Simple single-stage Dockerfile</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Basic Java App</span><span class="badge badge-orange">single stage</span></div>
+    <pre><span class="comment"># Use official JDK image</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span>
+
+<span class="comment"># Set working directory inside container</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Copy the built JAR file</span>
+<span class="keyword">COPY</span> <span class="value">target/myapp.jar app.jar</span>
+
+<span class="comment"># Expose port</span>
+<span class="keyword">EXPOSE</span> <span class="value">8080</span>
+
+<span class="comment"># Run the jar</span>
+<span class="keyword">CMD</span> <span class="string">["java", "-jar", "app.jar"]</span></pre>
+  </div>
+
+  <div class="tip-box"><strong>Note:</strong> This assumes you already ran <code>mvn package</code> or <code>gradle build</code> on your machine BEFORE building the Docker image. The JAR must exist in <code>target/</code> folder.</div>
+
+  <div class="section-title">Which base image to pick?</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Base image options</span></div>
+    <pre><span class="comment"># JDK — has compiler, needed to BUILD Java code</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span>   <span class="comment"># ~350MB</span>
+
+<span class="comment"># JRE — only runs Java, cannot compile — use for PRODUCTION</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jre-alpine</span>   <span class="comment"># ~180MB</span>
+
+<span class="comment"># Smallest possible — distroless (Google)</span>
+<span class="keyword">FROM</span> <span class="string">gcr.io/distroless/java17-debian12</span> <span class="comment"># ~220MB, no shell</span>
+
+<span class="comment"># OpenJDK (community maintained)</span>
+<span class="keyword">FROM</span> <span class="string">openjdk:17-alpine</span>               <span class="comment"># deprecated! avoid</span></pre>
+  </div>
+  <div class="warn-box"><strong>Avoid openjdk:</strong> The <code>openjdk</code> images are deprecated. Use <code>eclipse-temurin</code> (Adoptium) or <code>amazoncorretto</code> instead.</div>
+</div>
+
+<!-- MULTI-STAGE -->
+<div class="panel" id="panel-multistage">
+  <div class="section-title">Multi-stage — Maven project</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Maven multi-stage</span><span class="badge badge-green">recommended</span></div>
+    <pre><span class="comment"># ── Stage 1: BUILD ──────────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span> <span class="keyword">AS</span> <span class="highlight">builder</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Copy Maven wrapper + pom.xml FIRST (cache trick)</span>
+<span class="keyword">COPY</span> <span class="value">mvnw .</span>
+<span class="keyword">COPY</span> <span class="value">.mvn .mvn</span>
+<span class="keyword">COPY</span> <span class="value">pom.xml .</span>
+
+<span class="comment"># Download dependencies (cached if pom.xml unchanged)</span>
+<span class="keyword">RUN</span> <span class="value">./mvnw dependency:go-offline -B</span>
+
+<span class="comment"># Now copy source code and build</span>
+<span class="keyword">COPY</span> <span class="value">src ./src</span>
+<span class="keyword">RUN</span> <span class="value">./mvnw package -DskipTests</span>
+
+<span class="comment"># ── Stage 2: PRODUCTION ─────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jre-alpine</span> <span class="keyword">AS</span> <span class="highlight">production</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Copy ONLY the jar from builder</span>
+<span class="keyword">COPY</span> <span class="value">--from=builder /app/target/*.jar app.jar</span>
+
+<span class="keyword">EXPOSE</span> <span class="value">8080</span>
+<span class="keyword">CMD</span> <span class="string">["java", "-jar", "app.jar"]</span></pre>
+  </div>
+
+  <div class="section-title">Multi-stage — Gradle project</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Gradle multi-stage</span><span class="badge badge-green">recommended</span></div>
+    <pre><span class="comment"># ── Stage 1: BUILD ──────────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span> <span class="keyword">AS</span> <span class="highlight">builder</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Copy gradle wrapper + build files FIRST</span>
+<span class="keyword">COPY</span> <span class="value">gradlew .</span>
+<span class="keyword">COPY</span> <span class="value">gradle gradle</span>
+<span class="keyword">COPY</span> <span class="value">build.gradle settings.gradle .</span>
+
+<span class="comment"># Download dependencies</span>
+<span class="keyword">RUN</span> <span class="value">./gradlew dependencies --no-daemon</span>
+
+<span class="comment"># Copy source and build</span>
+<span class="keyword">COPY</span> <span class="value">src ./src</span>
+<span class="keyword">RUN</span> <span class="value">./gradlew bootJar --no-daemon</span>
+
+<span class="comment"># ── Stage 2: PRODUCTION ─────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jre-alpine</span> <span class="keyword">AS</span> <span class="highlight">production</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="keyword">COPY</span> <span class="value">--from=builder /app/build/libs/*.jar app.jar</span>
+
+<span class="keyword">EXPOSE</span> <span class="value">8080</span>
+<span class="keyword">CMD</span> <span class="string">["java", "-jar", "app.jar"]</span></pre>
+  </div>
+</div>
+
+<!-- SPRING BOOT -->
+<div class="panel" id="panel-spring">
+  <div class="section-title">Spring Boot layered JAR (best practice)</div>
+  <div class="tip-box"><strong>What is layered JAR?</strong> Spring Boot 2.3+ splits the JAR into layers: dependencies (rarely change), spring-boot-loader, snapshot-dependencies, application (your code — changes most). Each layer = separate Docker layer → faster rebuilds when only your code changes.</div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Spring Boot layered Dockerfile</span><span class="badge badge-purple">Spring Boot 2.3+</span></div>
+    <pre><span class="comment"># ── Stage 1: BUILD ──────────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span> <span class="keyword">AS</span> <span class="highlight">builder</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+<span class="keyword">COPY</span> <span class="value">mvnw . </span>
+<span class="keyword">COPY</span> <span class="value">.mvn .mvn</span>
+<span class="keyword">COPY</span> <span class="value">pom.xml .</span>
+<span class="keyword">RUN</span> <span class="value">./mvnw dependency:go-offline -B</span>
+<span class="keyword">COPY</span> <span class="value">src ./src</span>
+<span class="keyword">RUN</span> <span class="value">./mvnw package -DskipTests</span>
+
+<span class="comment"># ── Stage 2: EXTRACT layers ─────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jdk-alpine</span> <span class="keyword">AS</span> <span class="highlight">extractor</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+<span class="keyword">COPY</span> <span class="value">--from=builder /app/target/*.jar app.jar</span>
+<span class="comment"># Extract layers from the fat JAR</span>
+<span class="keyword">RUN</span> <span class="value">java -Djarmode=layertools -jar app.jar extract</span>
+
+<span class="comment"># ── Stage 3: PRODUCTION ─────────────────────</span>
+<span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jre-alpine</span> <span class="keyword">AS</span> <span class="highlight">production</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Copy layers in ORDER: least-changing → most-changing</span>
+<span class="keyword">COPY</span> <span class="value">--from=extractor /app/dependencies/ ./</span>
+<span class="keyword">COPY</span> <span class="value">--from=extractor /app/spring-boot-loader/ ./</span>
+<span class="keyword">COPY</span> <span class="value">--from=extractor /app/snapshot-dependencies/ ./</span>
+<span class="keyword">COPY</span> <span class="value">--from=extractor /app/application/ ./</span>
+
+<span class="keyword">EXPOSE</span> <span class="value">8080</span>
+<span class="comment"># Use JarLauncher instead of java -jar</span>
+<span class="keyword">ENTRYPOINT</span> <span class="string">["java", "org.springframework.boot.loader.JarLauncher"]</span></pre>
+  </div>
+  <div class="good-box"><strong>Why this is best:</strong> When you change only your code, Docker reuses the cached <code>dependencies</code> layer (the heaviest one). Only the tiny <code>application</code> layer rebuilds → push/pull is 10x faster in CI/CD pipelines like Jenkins and ArgoCD.</div>
+</div>
+
+<!-- OPTIMISE -->
+<div class="panel" id="panel-optimise">
+  <div class="section-title">JVM memory flags for containers</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Container-aware JVM flags</span><span class="badge badge-blue">important for K8s</span></div>
+    <pre><span class="keyword">CMD</span> <span class="string">["java", \</span>
+  <span class="comment"># Respect container memory limits (K8s/Docker)</span>
+  <span class="string">"-XX:+UseContainerSupport", \</span>
+  <span class="comment"># Use max 75% of container memory for heap</span>
+  <span class="string">"-XX:MaxRAMPercentage=75.0", \</span>
+  <span class="comment"># Use G1 GC (best for containers)</span>
+  <span class="string">"-XX:+UseG1GC", \</span>
+  <span class="comment"># Faster startup (skip JIT on rarely used code)</span>
+  <span class="string">"-XX:TieredStopAtLevel=1", \</span>
+  <span class="string">"-jar", "app.jar"]</span></pre>
+  </div>
+  <div class="warn-box"><strong>Why this matters in Kubernetes:</strong> Without <code>UseContainerSupport</code>, JVM reads the HOST machine's RAM (e.g. 32GB) instead of your pod's memory limit (e.g. 512MB) → JVM allocates 8GB heap → pod gets OOMKilled immediately.</div>
+
+  <div class="section-title">Security best practices</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Run as non-root user</span><span class="badge badge-red">security</span></div>
+    <pre><span class="keyword">FROM</span> <span class="string">eclipse-temurin:17-jre-alpine</span>
+<span class="keyword">WORKDIR</span> <span class="value">/app</span>
+
+<span class="comment"># Create a non-root user</span>
+<span class="keyword">RUN</span> <span class="value">addgroup -S appgroup && adduser -S appuser -G appgroup</span>
+
+<span class="keyword">COPY</span> <span class="value">--from=builder /app/target/*.jar app.jar</span>
+
+<span class="comment"># Change ownership</span>
+<span class="keyword">RUN</span> <span class="value">chown appuser:appgroup app.jar</span>
+
+<span class="comment"># Switch to non-root user</span>
+<span class="keyword">USER</span> <span class="value">appuser</span>
+
+<span class="keyword">EXPOSE</span> <span class="value">8080</span>
+<span class="keyword">CMD</span> <span class="string">["java", "-jar", "app.jar"]</span></pre>
+  </div>
+
+  <div class="section-title">.dockerignore — always create this!</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">.dockerignore file</span></div>
+    <pre><span class="comment"># Stops these from being sent to Docker build context</span>
+<span class="warn">.git</span>
+<span class="warn">.gitignore</span>
+<span class="warn">target/</span>            <span class="comment"># Maven build output (except the jar)</span>
+<span class="warn">build/</span>             <span class="comment"># Gradle build output</span>
+<span class="warn">*.md</span>
+<span class="warn">.idea/</span>             <span class="comment"># IntelliJ files</span>
+<span class="warn">.vscode/</span>
+<span class="warn">**/*.log</span>
+<span class="warn">**/*.iml</span></pre>
+  </div>
+</div>
+
+<!-- IMAGE SIZES -->
+<div class="panel" id="panel-sizes">
+  <div class="section-title">Image size comparison</div>
+
+  <div style="margin-bottom:16px">
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>openjdk:11 (deprecated)</span><span>~650 MB</span></div>
+      <div class="size-bar bar-red" style="width:100%">❌ avoid</div>
+    </div>
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>eclipse-temurin:17-jdk</span><span>~450 MB</span></div>
+      <div class="size-bar bar-red" style="width:69%">build only</div>
+    </div>
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>eclipse-temurin:17-jdk-alpine</span><span>~350 MB</span></div>
+      <div class="size-bar bar-orange" style="width:54%">build stage</div>
+    </div>
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>amazoncorretto:17-alpine</span><span>~280 MB</span></div>
+      <div class="size-bar bar-orange" style="width:43%">good choice</div>
+    </div>
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>eclipse-temurin:17-jre-alpine</span><span>~180 MB</span></div>
+      <div class="size-bar bar-green" style="width:28%">✅ production</div>
+    </div>
+    <div class="size-bar-wrap">
+      <div class="size-label"><span>distroless/java17</span><span>~220 MB</span></div>
+      <div class="size-bar bar-green" style="width:34%">✅ most secure</div>
+    </div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="compare-header bad-header">❌ Single stage (JDK)</div>
+      <pre style="font-size:11px;padding:10px;background:#0d1117">Contains:
+- Full JDK compiler
+- Maven / Gradle
+- Source code (.java)
+- Test files
+- Build cache
+- Final JAR
+Size: ~500MB+</pre>
+    </div>
+    <div class="compare-card">
+      <div class="compare-header good-header">✅ Multi stage (JRE)</div>
+      <pre style="font-size:11px;padding:10px;background:#0d1117">Contains:
+- JRE only (run only)
+- Final JAR only
+- Nothing else
+Size: ~200MB</pre>
+    </div>
+  </div>
+</div>
+
+<!-- CMD vs ENTRYPOINT -->
+<div class="panel" id="panel-commands">
+  <div class="section-title">CMD vs ENTRYPOINT explained</div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Key difference</span></div>
+    <pre><span class="comment"># ENTRYPOINT — cannot be overridden easily</span>
+<span class="keyword">ENTRYPOINT</span> <span class="string">["java", "-jar", "app.jar"]</span>
+<span class="comment"># docker run myapp              → java -jar app.jar</span>
+<span class="comment"># docker run myapp --debug      → java -jar app.jar --debug</span>
+
+<span class="comment"># CMD — can be overridden by docker run</span>
+<span class="keyword">CMD</span> <span class="string">["java", "-jar", "app.jar"]</span>
+<span class="comment"># docker run myapp              → java -jar app.jar</span>
+<span class="comment"># docker run myapp bash         → bash  (CMD replaced!)</span>
+
+<span class="comment"># BEST PATTERN — combine both</span>
+<span class="keyword">ENTRYPOINT</span> <span class="string">["java", "-jar"]</span>     <span class="comment"># fixed command</span>
+<span class="keyword">CMD</span> <span class="string">["app.jar"]</span>                 <span class="comment"># default arg (overridable)</span></pre>
+  </div>
+
+  <div class="section-title">Common Java CMD patterns</div>
+  <table class="cmd-table" style="width:100%;background:#161b22;border-radius:10px;border:1px solid #21262d;overflow:hidden;border-collapse:collapse">
+    <tr>
+      <td class="cmd">java -jar app.jar</td>
+      <td class="desc">Basic — run the fat JAR</td>
+    </tr>
+    <tr>
+      <td class="cmd">java -XX:+UseContainerSupport -jar app.jar</td>
+      <td class="desc">K8s/Docker memory aware</td>
+    </tr>
+    <tr>
+      <td class="cmd">java -Dspring.profiles.active=prod -jar app.jar</td>
+      <td class="desc">Spring Boot prod profile</td>
+    </tr>
+    <tr>
+      <td class="cmd">java -Xms256m -Xmx512m -jar app.jar</td>
+      <td class="desc">Fixed heap size (old way)</td>
+    </tr>
+    <tr>
+      <td class="cmd">java org.springframework.boot.loader.JarLauncher</td>
+      <td class="desc">Spring layered JAR launcher</td>
+    </tr>
+  </table>
+
+  <div class="section-title" style="margin-top:16px">ENV variables pattern</div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Pass config via environment</span></div>
+    <pre><span class="comment"># Set default ENV in Dockerfile</span>
+<span class="keyword">ENV</span> <span class="value">SPRING_PROFILES_ACTIVE</span>=<span class="string">prod</span>
+<span class="keyword">ENV</span> <span class="value">SERVER_PORT</span>=<span class="string">8080</span>
+<span class="keyword">ENV</span> <span class="value">JAVA_OPTS</span>=<span class="string">"-XX:+UseContainerSupport -XX:MaxRAMPercentage=75"</span>
+
+<span class="comment"># Use JAVA_OPTS in CMD</span>
+<span class="keyword">CMD</span> <span class="string">["sh", "-c", "java $JAVA_OPTS -jar app.jar"]</span>
+
+<span class="comment"># Override at runtime:</span>
+<span class="comment"># docker run -e JAVA_OPTS="-Xmx1g" myapp</span>
+<span class="comment"># kubectl set env deploy/myapp JAVA_OPTS="-Xmx2g"</span></pre>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
